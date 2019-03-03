@@ -1,6 +1,10 @@
 import ipywidgets as widgets
 import traitlets
 from traitlets import Unicode, CInt, List, Tuple, Instance, Union, Dict, Bool, Any
+from traittypes import Array
+
+from .traits import (Date, array_serialization,
+                     array_squeeze, array_dimension_bounds, array_supported_kinds)
 
 from .utils import transpose
 from ._version import __version_js__
@@ -16,6 +20,12 @@ class Cell(widgets.Widget):
     _model_module_version = Unicode(semver_range_frontend).tag(sync=True)
     # value = Union([Bool(), Unicode(), Float(), Int()], allow_none=True, default_value=None).tag(sync=True)
     value = Any().tag(sync=True, **widgets.widget_serialization)
+    
+    array = Array([]).tag(sync=True, scaled=True, rtype='Number',
+                      atype='bqplot.Axis',
+                      **array_serialization)\
+        .valid(array_squeeze, array_dimension_bounds(1, 1))    
+    
     row_start = CInt(3).tag(sync=True)
     column_start = CInt(4).tag(sync=True)
     row_end = CInt(3).tag(sync=True)
@@ -88,6 +98,7 @@ class Sheet(widgets.DOMWidget):
     column_headers = Union([Bool(), List(Unicode())], default_value=True).tag(sync=True)
     stretch_headers = Unicode('all').tag(sync=True)
     column_width = Union([CInt(), List(CInt())], default_value=None, allow_none=True).tag(sync=True)
+   
 
     def __getitem__(self, item):
         '''Gets a previously created cell at row and column
